@@ -527,6 +527,38 @@ pub trait TimeZone: Sized + Clone {
     /// Creates the offset for given UTC `NaiveDateTime`. This cannot fail.
     fn offset_from_utc_datetime(&self, utc: &NaiveDateTime) -> Self::Offset;
 
+    /// Returns first date after `utc` when offset is going to change.
+    fn next_offset_change_utc(
+        &self,
+        _utc: &NaiveDateTime,
+    ) -> Option<(DateTime<Utc>, Self::Offset)> {
+        None
+    }
+
+    /// Returns previous date before `utc` when offset changed.
+    fn previous_offset_change_utc(
+        &self,
+        _utc: &NaiveDateTime,
+    ) -> Option<(DateTime<Utc>, Self::Offset)> {
+        None
+    }
+
+    /// Returns first date after `datetime` when offset is going to change.
+    fn next_offset_change(
+        &self,
+        _datetime: &DateTime<Self>,
+    ) -> Option<(DateTime<Self>, Self::Offset)> {
+        None
+    }
+
+    /// Returns previous date before `datetime` when offset changed.
+    fn previous_offset_change(
+        &self,
+        _datetime: &DateTime<Self>,
+    ) -> Option<(DateTime<Self>, Self::Offset)> {
+        None
+    }
+
     /// Converts the UTC `NaiveDate` to the local time.
     /// The UTC is continuous and thus this cannot fail (but can give the duplicate local time).
     #[allow(clippy::wrong_self_convention)]
