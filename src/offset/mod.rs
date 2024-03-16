@@ -99,6 +99,11 @@ pub struct OffsetChangeUtc<Tz: TimeZone> {
 
 impl<Tz: TimeZone> OffsetChangeUtc<Tz> {
     /// a
+    pub fn new(change_time: DateTime<Utc>, from: Tz::Offset, to: Tz::Offset) -> Self {
+        Self { change_time, from, to }
+    }
+
+    /// a
     pub fn change_time(&self) -> &DateTime<Utc> {
         &self.change_time
     }
@@ -587,13 +592,19 @@ pub trait TimeZone: Sized + Clone {
     }
 
     /// Returns first date after `datetime` when offset is going to change.
-    fn next_offset_change(&self, _datetime: &DateTime<Self>) -> Option<OffsetChange<Self>> {
-        None
+    fn next_offset_change(&self, local: &DateTime<Self>) -> Option<OffsetChange<Self>> {
+        let OffsetChangeUtc { change_time, from, to } =
+            self.next_offset_change_utc(&local.naive_utc())?;
+        let change_time = DateTime::from_naive_utc_and_offset(change_time.naive_utc(), to);
+        Some(OffsetChange { change_time, from })
     }
 
     /// Returns previous date before `datetime` when offset changed.
-    fn previous_offset_change(&self, _datetime: &DateTime<Self>) -> Option<OffsetChange<Self>> {
-        None
+    fn previous_offset_change(&self, local: &DateTime<Self>) -> Option<OffsetChange<Self>> {
+        let OffsetChangeUtc { change_time, from, to } =
+            self.previous_offset_change_utc(&local.naive_utc())?;
+        let change_time = DateTime::from_naive_utc_and_offset(change_time.naive_utc(), to);
+        Some(OffsetChange { change_time, from })
     }
 
     /// Converts the UTC `NaiveDate` to the local time.
