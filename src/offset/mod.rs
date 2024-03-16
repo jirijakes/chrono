@@ -89,6 +89,55 @@ impl<T> LocalResult<T> {
     }
 }
 
+/// a
+#[derive(Debug)]
+pub struct OffsetChangeUtc<Tz: TimeZone> {
+    change_time: DateTime<Utc>,
+    from: Tz::Offset,
+    to: Tz::Offset,
+}
+
+impl<Tz: TimeZone> OffsetChangeUtc<Tz> {
+    /// a
+    pub fn change_time(&self) -> &DateTime<Utc> {
+        &self.change_time
+    }
+
+    /// a
+    pub fn from_offset(&self) -> &Tz::Offset {
+        &self.from
+    }
+
+    /// a
+    pub fn to_offset(&self) -> &Tz::Offset {
+        &self.to
+    }
+}
+
+/// a
+#[derive(Debug)]
+pub struct OffsetChange<Tz: TimeZone> {
+    change_time: DateTime<Tz>,
+    from: Tz::Offset,
+}
+
+impl<Tz: TimeZone> OffsetChange<Tz> {
+    /// a
+    pub fn change_time(&self) -> &DateTime<Tz> {
+        &self.change_time
+    }
+
+    /// a
+    pub fn from_offset(&self) -> &Tz::Offset {
+        &self.from
+    }
+
+    /// a
+    pub fn to_offset(&self) -> &Tz::Offset {
+        self.change_time.offset()
+    }
+}
+
 #[allow(deprecated)]
 impl<Tz: TimeZone> LocalResult<Date<Tz>> {
     /// Makes a new `DateTime` from the current date and given `NaiveTime`.
@@ -528,34 +577,22 @@ pub trait TimeZone: Sized + Clone {
     fn offset_from_utc_datetime(&self, utc: &NaiveDateTime) -> Self::Offset;
 
     /// Returns first date after `utc` when offset is going to change.
-    fn next_offset_change_utc(
-        &self,
-        _utc: &NaiveDateTime,
-    ) -> Option<(DateTime<Utc>, Self::Offset)> {
+    fn next_offset_change_utc(&self, _utc: &NaiveDateTime) -> Option<OffsetChangeUtc<Self>> {
         None
     }
 
     /// Returns previous date before `utc` when offset changed.
-    fn previous_offset_change_utc(
-        &self,
-        _utc: &NaiveDateTime,
-    ) -> Option<(DateTime<Utc>, Self::Offset)> {
+    fn previous_offset_change_utc(&self, _utc: &NaiveDateTime) -> Option<OffsetChangeUtc<Self>> {
         None
     }
 
     /// Returns first date after `datetime` when offset is going to change.
-    fn next_offset_change(
-        &self,
-        _datetime: &DateTime<Self>,
-    ) -> Option<(DateTime<Self>, Self::Offset)> {
+    fn next_offset_change(&self, _datetime: &DateTime<Self>) -> Option<OffsetChange<Self>> {
         None
     }
 
     /// Returns previous date before `datetime` when offset changed.
-    fn previous_offset_change(
-        &self,
-        _datetime: &DateTime<Self>,
-    ) -> Option<(DateTime<Self>, Self::Offset)> {
+    fn previous_offset_change(&self, _datetime: &DateTime<Self>) -> Option<OffsetChange<Self>> {
         None
     }
 
