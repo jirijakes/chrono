@@ -25,7 +25,7 @@ use crate::format::{write_rfc2822, write_rfc3339, DelayedFormat, SecondsFormat};
 use crate::naive::{Days, IsoWeek, NaiveDate, NaiveDateTime, NaiveTime};
 #[cfg(feature = "clock")]
 use crate::offset::Local;
-use crate::offset::{FixedOffset, Offset, TimeZone, Utc};
+use crate::offset::{FixedOffset, Offset, OffsetChange, TimeZone, Utc};
 #[allow(deprecated)]
 use crate::Date;
 use crate::{expect, try_opt};
@@ -613,6 +613,28 @@ impl<Tz: TimeZone> DateTime<Tz> {
             true => Some(years as u32),
             false => None,
         }
+    }
+
+    /// Returns first offset change after current date and time.
+    ///
+    /// # Errors
+    ///
+    /// Returns `None` if no such change exists or the timezone does not support offset changes.
+    #[inline]
+    #[must_use]
+    pub fn next_offset_change(&self) -> Option<OffsetChange<Tz>> {
+        self.timezone().next_offset_change(self)
+    }
+
+    /// Returns first offset change before current date and time.
+    ///
+    /// # Errors
+    ///
+    /// Returns `None` if no such change exists or the timezone does not support offset changes.
+    #[inline]
+    #[must_use]
+    pub fn previous_offset_change(&self) -> Option<OffsetChange<Tz>> {
+        self.timezone().previous_offset_change(self)
     }
 
     /// Returns an RFC 2822 date and time string such as `Tue, 1 Jul 2003 10:52:37 +0200`.
